@@ -3,6 +3,7 @@ import pandas as pd
 import numpy as np
 import random
 import pickle
+import xgboost as xgb
 
 st.title("Сервис прогнозирования задержки рейса")
 
@@ -70,11 +71,11 @@ def predict_delay(model, features):
 
 flights_data_path = "data/data_user.parquet"
 model_data_path = "data/model_data.parquet"
-# model_path = "flight_delay_model.pkl"
+model_path = "xgb_model_1.pkl"
 
 flights = load_parquet_data(flights_data_path)
 model_df = load_parquet_data(model_data_path)
-# model = load_model(model_path)
+model = load_model(model_path)
 
 # --------------------------------------------------------
 
@@ -124,8 +125,8 @@ with main:
         st.write(flights[flights["flight_number"] == selected_flight])
 
     if st.button('Выполнить прогноз задержки рейса'):
-        matching_row = model_df[model_df["index"] == selected_flight]
-        prog_del = 1
-        st.write(matching_row)
+        matching_row = model_df[model_df["index"] == selected_flight].drop('index', axis=1)
+        prog_del = model.predict(matching_row)
+        st.write(get_compensation_info(prog_del))
         
         
