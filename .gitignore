@@ -1,0 +1,41 @@
+# Исключаем папки и файлы виртуальной среды
+venv/
+ENV/
+env/
+.venv/
+*.env
+
+# pycache файлы
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Системные файлы
+.DS_Store
+Thumbs.db
+
+# Сетевые файлы IDE (например, PyCharm, VSCode и другие)
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Файлы конфигурации IDE и редакторов
+*.log
+*.bak
+
+# Резервные файлы
+*.swp
+
+# Файлы тестирования
+nosetests.xml
+coverage.xml
+*.cover
+*.hypothesis/
+*.tox/
+
+# Пакеты
+*.egg
+*.egg-info/
+dist/
+build/
