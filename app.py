@@ -92,7 +92,7 @@ flights_data_path = "ml_data/user_data.parquet"
 model_data_path = "ml_data/model_data.parquet"
 model_path = "ml_data/xgb_model_1.pkl"
 
-download_model()
+download_model(model_path)
 
 flights = load_parquet_data(flights_data_path)
 model_df = load_parquet_data(model_data_path)
