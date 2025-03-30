@@ -4,34 +4,6 @@ import numpy as np
 import random
 import pickle
 import xgboost as xgb
-import gdown
-import os
-from pathlib import Path
-
-import gdown
-import pickle
-import os
-import gzip
-from pathlib import Path
-
-def load_model(model_path):
-    # Проверяем, существует ли файл и имеет ли нормальный размер
-    if not os.path.exists(model_path) or os.path.getsize(model_path) < 102400:  # Меньше 100KB = явно битый
-        download_model(model_path)
-    
-    with gzip.open(model_path, 'rb') as f:
-        model = pickle.load(f)
-
-def download_model(model_path):
-    model_url = "https://drive.google.com/uc?id=1jHUuoCu9wiv5Ab3Gz4Z8dzn5MFhzouhR"  # Используем прямую ссылку
-    os.makedirs(os.path.dirname(model_path), exist_ok=True)
-    
-    try:
-        gdown.download(model_url, model_path, quiet=False)
-        print(f"Model downloaded to {model_path} ({os.path.getsize(model_path)/1024/1024:.2f} MB)")
-    except Exception as e:
-        print(f"Download failed: {str(e)}")
-        raise
 
 st.title("Сервис прогнозирования задержки рейса")
 
@@ -65,15 +37,17 @@ set_bg_hack_url()
 
 # Функция для вывода условий компенсации
 def get_compensation_info(delay_minutes):
-    if delay_minutes == 2:
-        return "Рейс будет вовремя"
+    if delay_minutes == 0:
+        return "Рейс отменен"
     elif delay_minutes == 3:
-        return "0-2 часа\nКомпенсация не полагается"
-    elif delay_minutes == 1:
-        return "Более 2 часов:\nНапитки, возможность 2 телефонных звонков или 2 сообщения по электронной почте"
-    elif delay_minutes == 0:
-        return "Более 4 часов:\nБесплатное горячее питание\nЕсли задержка продолжается, то кормить пассажиров авиакомпания обязана каждые 6 часов в дневное время и каждые 8 часов в ночное"
+        return "Рейс будет вовремя"
     elif delay_minutes == 4:
+        return "0-2 часа\nКомпенсация не полагается"
+    elif delay_minutes == 2:
+        return "Более 2 часов:\nНапитки, возможность 2 телефонных звонков или 2 сообщения по электронной почте"
+    elif delay_minutes == 1:
+        return "Более 4 часов:\nБесплатное горячее питание\nЕсли задержка продолжается, то кормить пассажиров авиакомпания обязана каждые 6 часов в дневное время и каждые 8 часов в ночное"
+    elif delay_minutes == 5:
         return "Более 6 часов:\nРазмещение в гостинице + трансфер туда и обратно"
 
 # --------------------------------------------------------
@@ -81,19 +55,17 @@ def get_compensation_info(delay_minutes):
 def load_parquet_data(file_path):
     return pd.read_parquet(file_path)
 
-# def load_model(model_path):
-#     with open(model_path, 'rb') as file:
-#         return pickle.load(file)
+def load_model(model_path):
+    with open(model_path, 'rb') as file:
+        return pickle.load(file)
 
 def predict_delay(model, features):
     return model.predict(features)
 
 
-flights_data_path = "ml_data/user_data.parquet"
-model_data_path = "ml_data/model_data.parquet"
-model_path = "ml_data/model.pkl.gz"
-
-download_model(model_path)
+flights_data_path = "data/data_user.parquet"
+model_data_path = "data/model_data.parquet"
+model_path = "data/xgb_model_1.pkl"
 
 flights = load_parquet_data(flights_data_path)
 model_df = load_parquet_data(model_data_path)
@@ -115,6 +87,7 @@ main, flights_data = st.tabs(["Главная", "База рейсов"])
 with flights_data:
     st.subheader("База рейсов S7")
     
+    # Панель с кнопками для переключения страниц
     col1, col2 = st.columns([1, 1])
 
     with col1:
@@ -127,6 +100,7 @@ with flights_data:
             if st.session_state.start_index + 10 < len(flights):
                 st.session_state.start_index += 10
 
+    # Отображение данных с переключением
     st.dataframe(show_flights(st.session_state.start_index))
 
 with main:
@@ -145,7 +119,6 @@ with main:
         st.write(flights[flights["flight_number"] == selected_flight])
 
     if st.button('Выполнить прогноз задержки рейса'):
-        matching_row = model_df.iloc[[selected_flight]]
+        matching_row = model_df[model_df["index"] == selected_flight].drop('index', axis=1)
         prog_del = model.predict(matching_row)
         st.write(get_compensation_info(prog_del))
-           
