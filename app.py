@@ -14,12 +14,12 @@ def download_model():
     
     if not model_path.exists():
         model_path.parent.mkdir(parents=True, exist_ok=True)
-        try:
-            gdown.download(model_url, str(model_path), quiet=False)
-            print(f"Model downloaded to {model_path}")
-        except Exception as e:
-            print(f"Download failed: {str(e)}")
-            raise
+    try:
+        gdown.download(model_url, str(model_path), quiet=False)
+        print(f"Model downloaded to {model_path}")
+    except Exception as e:
+        print(f"Download failed: {str(e)}")
+        raise
     return model_path
 
 st.title("Сервис прогнозирования задержки рейса")
