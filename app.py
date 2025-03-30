@@ -8,19 +8,29 @@ import gdown
 import os
 from pathlib import Path
 
-def download_model():
-    model_url = "https://drive.google.com/file/d/17RktWgsYJBdMOg3BF4h6akQf71NGmR0P/view?usp=sharing"  # Замените на реальный ID
-    model_path = Path("ml_data/xgb_model_1.pkl")
+import gdown
+import pickle
+import os
+from pathlib import Path
+
+def load_model(model_path):
+    # Проверяем, существует ли файл и имеет ли нормальный размер
+    if not os.path.exists(model_path) or os.path.getsize(model_path) < 102400:  # Меньше 100KB = явно битый
+        download_model(model_path)
     
-    if not model_path.exists():
-        model_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(model_path, 'rb') as file:
+        return pickle.load(file)
+
+def download_model(model_path):
+    model_url = "https://drive.google.com/uc?id=17RktWgsYJBdMOg3BF4h6akQf71NGmR0P"  # Используем прямую ссылку
+    os.makedirs(os.path.dirname(model_path), exist_ok=True)
+    
     try:
-        gdown.download(model_url, str(model_path), quiet=False)
-        print(f"Model downloaded to {model_path}")
+        gdown.download(model_url, model_path, quiet=False)
+        print(f"Model downloaded to {model_path} ({os.path.getsize(model_path)/1024/1024:.2f} MB)")
     except Exception as e:
         print(f"Download failed: {str(e)}")
         raise
-    return model_path
 
 st.title("Сервис прогнозирования задержки рейса")
 
@@ -70,9 +80,9 @@ def get_compensation_info(delay_minutes):
 def load_parquet_data(file_path):
     return pd.read_parquet(file_path)
 
-def load_model(model_path):
-    with open(model_path, 'rb') as file:
-        return pickle.load(file)
+# def load_model(model_path):
+#     with open(model_path, 'rb') as file:
+#         return pickle.load(file)
 
 def predict_delay(model, features):
     return model.predict(features)
