@@ -4,6 +4,23 @@ import numpy as np
 import random
 import pickle
 import xgboost as xgb
+import gdown
+import os
+from pathlib import Path
+
+def download_model():
+    model_url = "https://drive.google.com/file/d/17RktWgsYJBdMOg3BF4h6akQf71NGmR0P/view?usp=sharing"  # Замените на реальный ID
+    model_path = Path("data/xgb_model_1.pkl")
+    
+    if not model_path.exists():
+        model_path.parent.mkdir(parents=True, exist_ok=True)
+        try:
+            gdown.download(model_url, str(model_path), quiet=False)
+            print(f"Model downloaded to {model_path}")
+        except Exception as e:
+            print(f"Download failed: {str(e)}")
+            raise
+    return model_path
 
 st.title("Сервис прогнозирования задержки рейса")
 
@@ -60,6 +77,7 @@ def load_model(model_path):
 def predict_delay(model, features):
     return model.predict(features)
 
+download_model()
 
 flights_data_path = "ml_data/user_data.parquet"
 model_data_path = "ml_data/model_data.parquet"
