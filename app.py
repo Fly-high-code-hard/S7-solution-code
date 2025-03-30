@@ -19,7 +19,7 @@ def load_model(model_path):
     if not os.path.exists(model_path) or os.path.getsize(model_path) < 102400:  # Меньше 100KB = явно битый
         download_model(model_path)
     
-    with gzip.open('model.pkl.gz', 'rb') as f:
+    with gzip.open(model_path, 'rb') as f:
         model = pickle.load(f)
 
 def download_model(model_path):
