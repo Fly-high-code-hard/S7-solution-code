@@ -10,7 +10,7 @@ from pathlib import Path
 
 def download_model():
     model_url = "https://drive.google.com/file/d/17RktWgsYJBdMOg3BF4h6akQf71NGmR0P/view?usp=sharing"  # Замените на реальный ID
-    model_path = Path("data/xgb_model_1.pkl")
+    model_path = Path("ml_data/xgb_model_1.pkl")
     
     if not model_path.exists():
         model_path.parent.mkdir(parents=True, exist_ok=True)
