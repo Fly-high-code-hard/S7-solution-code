@@ -11,6 +11,7 @@ from pathlib import Path
 import gdown
 import pickle
 import os
+import gzip
 from pathlib import Path
 
 def load_model(model_path):
@@ -18,11 +19,11 @@ def load_model(model_path):
     if not os.path.exists(model_path) or os.path.getsize(model_path) < 102400:  # Меньше 100KB = явно битый
         download_model(model_path)
     
-    with open(model_path, 'rb') as file:
-        return pickle.load(file)
+    with gzip.open('model.pkl.gz', 'rb') as f:
+        model = pickle.load(f)
 
 def download_model(model_path):
-    model_url = "https://drive.google.com/uc?id=17RktWgsYJBdMOg3BF4h6akQf71NGmR0P"  # Используем прямую ссылку
+    model_url = "https://drive.google.com/uc?id=1jHUuoCu9wiv5Ab3Gz4Z8dzn5MFhzouhR"  # Используем прямую ссылку
     os.makedirs(os.path.dirname(model_path), exist_ok=True)
     
     try:
@@ -90,7 +91,7 @@ def predict_delay(model, features):
 
 flights_data_path = "ml_data/user_data.parquet"
 model_data_path = "ml_data/model_data.parquet"
-model_path = "ml_data/xgb_model_1.pkl"
+model_path = "ml_data/model.pkl.gz"
 
 download_model(model_path)
 
